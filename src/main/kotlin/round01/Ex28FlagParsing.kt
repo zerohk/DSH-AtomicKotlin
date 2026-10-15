@@ -4,7 +4,8 @@ package round01
 // 不许 Regex、lambda、when、解构、break/continue
 // 判断字母必须用 in 配区间，不许 isLetter()
 //
-// ★ 请在下面写清你对 positionalArgs 与"无值 flag"的语义约定，并保证实现与之一致：
+// positionalArgs 规则：自身不是合法 flag，且它前面紧邻的元素也不是合法 flag
+// （下标 0 没有前一个元素 —— 注意别越界）
 
 fun String.isValidFlag(): Boolean = TODO()
 

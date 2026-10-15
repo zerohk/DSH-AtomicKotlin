@@ -902,14 +902,14 @@ class Product(val name: String, val priceInCents: Long)
 - `fun List<String>.flagNames(): Set<String>` —— 提取所有合法 flag 名（**保持原样、去重**）
 - `fun List<String>.valueOfFlag(flag: String): String` —— 返回紧随该 flag 之后的那个元素；flag 不存在、或后面没有元素、或该 flag 非法时抛 `IllegalArgumentException`
 - `fun List<String>.hasFlag(flag: String): Boolean`
-- `fun List<String>.positionalArgs(): List<String>` —— 返回既不是合法 flag、也不是任何 flag 的值的元素（按原顺序）
+- `fun List<String>.positionalArgs(): List<String>` —— 返回"位置参数"：自身不是合法 flag，**且**它前面紧邻的元素也不是合法 flag（也就是它不是任何 flag 的值）。按原顺序返回
 - `fun List<String>.toFlagMap(): Map<String, String>` —— 把 `["-a","1","-b","2"]` 变成 `{-a=1, -b=2}`；遇到"flag 后面没有值"时抛 `IllegalArgumentException`
 
 **约束**：
 - 不许用 `Regex`、不许 lambda、不许 `when`、不许解构（`toFlagMap` 里遍历 Map 时用 `keys`）、不许 `break`/`continue`。
 - 判断字母必须用 `in` 配区间（`c in 'a'..'z' || c in 'A'..'Z'`），不许用 `isLetter()`。
 - 不许用可空类型。注意 `valueOfFlag`：**下标越界要用 `if (index < list.size)` 先判断**，不要靠 `try/catch` 兜底（想清楚为什么"能预判就不该用异常"）。
-- `positionalArgs` 需要判断"某个元素是不是某个 flag 的值" —— 请认真设计：一个元素前面紧邻的是合法 flag，那它就是值。
+- `positionalArgs` 的判定规则就是"往前看一格"：下标 0 没有前一个元素，**这是最容易写出越界的地方**；其余元素只要前一个不是合法 flag，它就算位置参数。
 
 **验收标准**：
 - `"-v".isValidFlag()` → `true`；`"--verbose".isValidFlag()` → `true`
@@ -917,11 +917,15 @@ class Product(val name: String, val priceInCents: Long)
 - `listOf("-a", "1", "-b", "2").flagNames()` → `{-a, -b}`
 - `listOf("-a", "1", "-b", "2").valueOfFlag("-a")` → `"1"`
 - `listOf("-a", "1").valueOfFlag("-z")` 抛异常；`listOf("-a").valueOfFlag("-a")` 抛异常（后面没值）
-- `listOf("-v", "file.txt", "-o").positionalArgs()` → `["file.txt"]`（`-o` 是 flag，`file.txt` 是 `-v` 的值……注意这里要按你的设计给出**一致的语义**并在注释里写明：本规格约定 flag 一律**带值**，所以 `-o` 后面没值应当在 `toFlagMap` 里报错，而 `positionalArgs` 只返回"从未作为任何 flag 值出现、且自身不是 flag"的元素）
+- `listOf("-v", "file.txt", "-o").positionalArgs()` → `[]`
+  （`file.txt` 紧跟在 flag `-v` 之后，所以它是 `-v` 的值；`-o` 自身是 flag。两个都不算位置参数）
+- `listOf("input.txt", "-o", "out.txt", "extra").positionalArgs()` → `["input.txt", "extra"]`
+  （`input.txt` 前面没有元素；`out.txt` 紧跟在 flag `-o` 之后所以是值；`extra` 前一个是 `out.txt`，不是 flag，所以它算位置参数）
 - `listOf("-a", "1", "-b", "2").toFlagMap()` → 内容等价于 `{-a=1, -b=2}`
 - `listOf("-a").toFlagMap()` 抛 `IllegalArgumentException`
 
-> 这题故意留了一处**语义需要你自己定义清楚**的地方（`positionalArgs` 与"无值 flag"的关系）。请在代码顶部用注释写下你选择的语义，并保证实现与之一致 —— **"先定义语义、再实现、再自测"是工程能力，不只是语法能力。**
+> 这题把"语义边界"摊开给你看：`positionalArgs` 的规则已经给死（往前看一格），但**"flag 后面没值"这件事在不同函数里的处理方式并不相同** —— 它是 `toFlagMap` 的错误条件，却不影响 `positionalArgs`（`-o` 后面没值，只意味着 `-o` 是个 flag，不产生任何位置参数）。
+> 请在代码顶部用注释写下这条规则，并保证实现与之一致 —— **"先定义语义、再实现、再自测"是工程能力，不只是语法能力。**
 
 ---
 
