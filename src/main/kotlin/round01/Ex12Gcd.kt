@@ -7,5 +7,5 @@ fun absInt(n: Int): Int = TODO()
 
 fun gcd(a: Int, b: Int): Int = TODO()
 
-// 先用 Long，且先除后乘；lcm(0, x) == 0
+// 先用 Long，且先除后乘；负数先取绝对值（lcm(-4, 6) == 12）；lcm(0, x) == 0
 fun lcm(a: Int, b: Int): Long = TODO()
