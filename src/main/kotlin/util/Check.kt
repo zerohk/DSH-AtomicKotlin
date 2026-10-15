@@ -40,8 +40,31 @@ fun checkFalse(label: String, actual: Boolean) {
 }
 
 fun checkString(label: String, expected: String, actual: String) {
-    if (expected == actual) pass(label) else fail(label, expected, actual)
+    if (expected == actual) {
+        pass(label)
+        return
+    }
+    fail(label, expected, actual)
+    reportFirstDiff(expected, actual)
 }
+
+// 专治"看起来一模一样"的失败：定位第一个不同的字符，并打印它的码点。
+// 例：℃(U+2103) 与 °C(U+00B0 U+0043) 肉眼几乎无法区分，长度还不同（1 个字符 vs 2 个字符）。
+private fun reportFirstDiff(expected: String, actual: String) {
+    var i = 0
+    var limit = expected.length
+    if (actual.length < limit) limit = actual.length
+    while (i < limit && expected[i] == actual[i]) i = i + 1
+
+    println("      长度: expected=${expected.length}  actual=${actual.length}")
+    println("      首个不同处在下标 $i")
+    if (i < expected.length) println("        expected[$i] = ${charInfo(expected[i])}")
+    else println("        expected[$i] = <已到末尾>")
+    if (i < actual.length) println("        actual[$i]   = ${charInfo(actual[i])}")
+    else println("        actual[$i]   = <已到末尾>")
+}
+
+private fun charInfo(ch: Char): String = "'$ch'  U+${ch.code.toString(16).uppercase()}"
 
 fun checkContains(label: String, expectedPart: String, actual: String) {
     var i = 0
