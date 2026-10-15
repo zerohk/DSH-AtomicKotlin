@@ -1,0 +1,11 @@
+# 统一换行符，避免 Windows/Linux 之间来回改动
+* text=auto eol=lf
+
+# Windows 批处理必须是 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 二进制，不做换行转换
+*.jar binary
+*.png binary
+*.pdf binary
