@@ -2,6 +2,8 @@ package round01
 
 // 第 5 题 · BMI 计算与分级
 // bmiCategory 必须是单表达式函数；formatOneDecimal 不许用 String.format / "%.1f"
+// 陷阱：formatOneDecimal 对负数要先取绝对值再四舍五入。
+//       直接写 (value*10+0.5).toInt() 会把 -2.0 算成 -1.9（toInt 是向零截断）
 
 fun bmi(weightKg: Double, heightM: Double): Double = TODO()
 

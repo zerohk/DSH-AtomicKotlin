@@ -207,7 +207,9 @@ E:\Kotlin\DSH-AtomicKotlin\
 
 **约束**：
 - `bmiCategory` 必须是**单表达式函数**，用 `if / else if / else` 链，不许用 `when`。
-- `formatOneDecimal` **不许用 `String.format`**，也不许用 `"%.1f"`。请用"乘 10 → 加 0.5 → 转 Int → 除 10.0"的思路手工四舍五入。
+- `formatOneDecimal` **不许用 `String.format`**，也不许用 `"%.1f"`。用"乘 10 → 加 0.5 → 取整 → 除 10.0"的思路手工四舍五入。
+- ⚠️ **负数必须先处理符号**：直接对负数写 `(value * 10 + 0.5).toInt()` 会出错，因为 `toInt()` 是**向零截断**。实测：`-2.0` 会被算成 `-1.9`，`-3.456` 会被算成 `-3.4`。
+  正确做法：**先取绝对值 → 四舍五入 → 再补回负号**。
 - 不许用 lambda。
 
 **验收标准**：
@@ -217,6 +219,8 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `bmiCategory(28.0)` → `"肥胖"`
 - `formatOneDecimal(22.857142857142858)` → `"22.9"`
 - `formatOneDecimal(18.0)` → `"18.0"` ← **注意个位数必须补 `.0`，不能变成 `"18"`**
+- `formatOneDecimal(-2.0)` → `"-2.0"` ← **陷阱：直接 `(value*10+0.5).toInt()` 会得到 `"-1.9"`**
+- `formatOneDecimal(-3.456)` → `"-3.5"` ← 负数也要正确进位
 
 > `formatOneDecimal` 是本轮第一个"看起来简单、细节很多"的题。负数、整数、以及 `x.05` 这类进位情形都要自己试一遍。
 
@@ -284,13 +288,16 @@ E:\Kotlin\DSH-AtomicKotlin\
 
 **约束**：
 - `reverseNumber` 必须用 `while` + 取模 `/`、取余 `%` 实现。`n` 为负数时返回负数反转（如 `-123` → `-321`）。
+- 反转后**末尾的 0 会消失**（整数不保留前导零）：`1200` → `21`、`10` → `1`。这是自然的数学结果，不要为了"看起来对称"去特判。
 - `isPalindromeText` **不许用 `reversed()`**，请用手工循环比较（双指针或单指针均可）。
 - **不许用 `break`/`continue`、不许用递归**。
 
 **验收标准**：
 - `reverseNumber(1234)` → `4321`；`reverseNumber(0)` → `0`；`reverseNumber(-123)` → `-321`
+- `reverseNumber(1200)` → `21`；`reverseNumber(10)` → `1` ← **末尾的 0 反转后消失**
 - `isPalindromeNumber(12321)` → `true`；`isPalindromeNumber(1234)` → `false`
 - `isPalindromeText("level")` → `true`；`isPalindromeText("Level")` → `false`；`isPalindromeText("ab")` → `false`
+- `isPalindromeText("")` → `true`（空串按回文处理）；`isPalindromeText("a")` → `true`（单字符也是回文）
 
 ---
 
@@ -433,6 +440,8 @@ E:\Kotlin\DSH-AtomicKotlin\
 
 **验收标准**：
 - `rightTriangle(3)` → 恰好 3 行，各行 `*` 数为 1/2/3
+- `rightTriangle(0)` → `""`；`pyramid(0)` → `""`；`multiplicationTable(-1)` → `""`
+  （约束里写了 `n <= 0` 返回空串，但很容易漏测 —— 显式过一遍）
 - `pyramid(3)` → 3 行，每行长度都是 5，`*` 数依次为 1/3/5 且居中
 - `multiplicationTable(3)` → 3 行，**每行长度都是 12**（3 列 × 4 字符）
 - `multiplicationTable(3)` 第一行 → `"   1   2   3"`
@@ -845,6 +854,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 **验收标准**：
 - `listOf(3, 1, 4, 1, 5).secondMax()` → `4`（注意去重后是 {1,3,4,5}，第二大为 4）
 - `listOf(1, 1, 1).secondMax()` 抛异常；`listOf(5).secondMax()` 抛异常
+- `listOf(5, 5, 3).secondMax()` → `3` ← **最大值重复时，第二大指的是"第二大的不同值"，不是另一个 5**
 - `listOf(5, 2, 9).rangeOfValues()` → `7`
 - `listOf(1, 2, 3, 4).median()` → `2.5`；`listOf(3, 1, 2).median()` → `2.0`
 - `listOf(1, 2, 1).countOccurrences(1)` → `2`
