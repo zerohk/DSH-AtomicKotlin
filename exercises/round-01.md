@@ -474,7 +474,9 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `Rectangle(2.0, 2.0).isSquare` → `true`
 - `Rectangle(0.0, 5.0).area` → `0.0`（0 是合法的）
 - `Rectangle(-1.0, 5.0)` 抛 `IllegalArgumentException`
-- `describe()` 的返回里同时包含 `12.0` 和 `14.0`
+- `Rectangle(3.0, 4.0).describe()` → **必须恰好等于** `"3.0x4.0 area=12.0 perimeter=14.0 square=false"`
+- `Rectangle(2.0, 2.0).describe()` → `"2.0x2.0 area=4.0 perimeter=8.0 square=true"`
+  （原标准只写了"包含 `12.0` 和 `14.0`"，格式写错也能通过 —— 现在改成全等比较）
 
 ---
 
@@ -504,6 +506,9 @@ E:\Kotlin\DSH-AtomicKotlin\
 - 令 `t = Temperature(25.0)`；`t.fahrenheit = 212.0` 后 `t.celsius` → `100.0`
 - `t.celsius = -300.0` 抛 `IllegalArgumentException`，且**抛异常后 `t.celsius` 保持原值不变**（不变式不能被破坏）
 - `Temperature(-300.0)` 抛 `IllegalArgumentException`
+- `Temperature(25.0).describe()` → **必须恰好等于** `"25.0°C / 77.0°F"`
+- `Temperature(0.0).describe()` → `"0.0°C / 32.0°F"`
+  ⚠️ 这里的 `°C` 是 `°`(U+00B0) **加上**字母 `C`，共两个字符 —— 不要用输入法给出的 `℃`(U+2103) 合体字，理由见附录 B
 
 > "抛异常后状态不变"是本题最容易做错的地方，请专门为它设计一个自测。
 
@@ -534,6 +539,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `withdraw(999999)` 抛 `IllegalStateException`，且余额仍为 `7000L`
 - `deposit(-1)`、`deposit(0)`、`withdraw(-5)` 都抛 `IllegalArgumentException`
 - A 有 `7000`，`A.transferTo(B, 10000)` 抛异常后，A 仍是 `7000`、B 仍是 `0`
+- 令 `a = BankAccount("Ada")`；`a.deposit(10000)` 后 `a.statement()` → **必须恰好等于** `"Ada: 10000 分"`
 
 ---
 
@@ -906,6 +912,8 @@ class Product(val name: String, val priceInCents: Long)
 - `Product("A", 1999).isAffordable(2000)` → `true`；`isAffordable(1999)` → `true`；`isAffordable(1998)` → `false`
 - `listOf(Product("A",100), Product("B",250)).totalPriceInCents()` → `350L`
 - `listOf(Product("B",100), Product("A",100)).mostExpensive().name` → `"A"`（并列取字典序最小）
+- `Product("Widget", 1999).describe()` → **必须恰好等于** `"Widget: 19.99 元"`
+- 折扣边界：`Product("A", 1999).withDiscount(0).priceInCents` → `1999L`；`withDiscount(100).priceInCents` → `0L`
 
 ---
 
