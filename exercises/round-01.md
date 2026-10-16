@@ -378,6 +378,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `fizzBuzzUpTo(0)` → `""`；`fizzBuzzUpTo(-3)` → `""`
 - `everyNth(1, 10, 3)` → `[1, 4, 7, 10]`
 - `everyNth(5, 5, 2)` → `[5]`
+- `everyNth(1, 10, 100)` → `[1]`（步长比区间还大时，只剩下起点）
 - `everyNth(1, 10, 0)` 抛异常
 
 ---
@@ -444,7 +445,10 @@ E:\Kotlin\DSH-AtomicKotlin\
   （约束里写了 `n <= 0` 返回空串，但很容易漏测 —— 显式过一遍）
 - `pyramid(3)` → 3 行，每行长度都是 5，`*` 数依次为 1/3/5 且居中
 - `multiplicationTable(3)` → 3 行，**每行长度都是 12**（3 列 × 4 字符）
-- `multiplicationTable(3)` 第一行 → `"   1   2   3"`
+- `multiplicationTable(3)` 第一行 → `"   1   2   3"`；**最后一行** → `"   3   6   9"`
+
+> ⚠️ 这里有个**测试设计上的盲区**值得记住：乘法表是**对称**的（`i * j == j * i`），所以"行和列写反了"这种 bug，**任何断言都抓不出来** —— 因为它是自己的转置。
+> 遇到"对称性导致不可测"的情形，别指望测试：只能靠人工检查代码结构（比如确认外层循环变量用在了行首）。这是进阶的测试思维。
 
 > 乘法表每行长度恰好 12 这个断言，能一次性抓出所有对齐 bug —— 这就是"可验证的规格"的价值。
 
@@ -760,6 +764,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `sumAll(1, 2, 3)` → `6L`；`sumAll()` → `0L`
 - `average(1.0, 2.0, 3.0)` → `2.0`；`average()` 抛 `IllegalArgumentException`
 - `maxAll(3, 9, 2)` → `9`；`maxAll(-5, -9)` → `-5`；`maxAll()` 抛异常
+- 单元素退化情形（容易被忽略）：`maxAll(7)` → `7`；`average(5.0)` → `5.0`
 - `joinWith("-", "a", "b", "c")` → `"a-b-c"`；`joinWith("-")` → `""`；`joinWith("-", "a")` → `"a"`
 - `demoSpread(intArrayOf(1, 2, 3))` → `6L`
 - 额外：`sumAll(*intArrayOf(4, 5))` → `9L`（在 `Main.kt` 里直接调用验证）
