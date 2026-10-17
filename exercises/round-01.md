@@ -300,6 +300,10 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `isPalindromeNumber(12321)` → `true`；`isPalindromeNumber(1234)` → `false`
 - `isPalindromeText("level")` → `true`；`isPalindromeText("Level")` → `false`；`isPalindromeText("ab")` → `false`
 - `isPalindromeText("")` → `true`（空串按回文处理）；`isPalindromeText("a")` → `true`（单字符也是回文）
+- `isPalindromeText("racecar")` → `true`；`isPalindromeText("abcba")` → `true`
+- ⚠️ **`isPalindromeText("abca")` → `false`**、**`isPalindromeText("xyzzx")` → `false`**
+  这两条是专门用来抓"**只比较了首尾**"这个错误的：它们的首字符和末字符都相同，但中间不对称。只比较首尾的实现会把它们误判成 `true`，而上面 `"level"`、`"ab"`、`"a"` 这些例子**全都抓不出来**（它们的正确答案恰好与"首尾相同"一致）。
+- `isPalindromeText("xyzzyx")` → `true`（对照组，首尾相同**且**中间对称）
 
 ---
 
