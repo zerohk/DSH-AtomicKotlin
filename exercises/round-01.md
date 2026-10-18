@@ -491,6 +491,14 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `width` / `height` 用 `val` 且**不可为负**：构造时若 `< 0` 或不是有限数，抛 `IllegalArgumentException`（在 `init` 块里做）。
 - 不许用 `data class`（还没学）。不许 `require()`。
 - `area` / `perimeter` / `isSquare` 必须是 `val ... get() = ...` 形式，**不许写成普通函数**，也**不许**在构造时预算好存进字段。
+- ⚠️ **校验必须把"负数"和"非有限数"分开处理**。两个常见误区：
+  - `Double.MIN_VALUE` **不是**最负的数，而是**最小正数** `4.9E-324`。写 `width < Double.MIN_VALUE` 会把这个正数当上界 —— 结果是 **`0.0` 也被判为非法**（`0.0 < 4.9E-324` 为真），而 0 恰恰是合法的。
+  - `width > Double.MAX_VALUE` 除了 `+Infinity` 之外永远为假，同样抓不住 `NaN`：**`NaN` 与任何值比较都是 `false`**，所以 `NaN < 0`、`NaN > MAX_VALUE`、`NaN < MIN_VALUE` 全部为假，`NaN` 会**悄悄通过校验**。
+  - 推荐写法：用 `Double.isFinite()`（stdlib 成员函数，无需 import，不属于 `kotlin.math`）把"是否有限"一次判掉，再单独判 `< 0`：
+    ```kotlin
+    if (!width.isFinite() || !height.isFinite() || width < 0 || height < 0)
+        throw IllegalArgumentException("...")
+    ```
 - 不许用 lambda。
 
 **验收标准**：
@@ -498,6 +506,9 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `Rectangle(2.0, 2.0).isSquare` → `true`
 - `Rectangle(0.0, 5.0).area` → `0.0`（0 是合法的）
 - `Rectangle(-1.0, 5.0)` 抛 `IllegalArgumentException`
+- ⚠️ **非有限数必须拒绝**：`Rectangle(Double.NaN, 1.0)`、`Rectangle(1.0, Double.NaN)`、`Rectangle(Double.POSITIVE_INFINITY, 1.0)`、`Rectangle(1.0, Double.NEGATIVE_INFINITY)` 全部抛 `IllegalArgumentException`
+  （`NaN` 最容易漏：它与任何值比较都为 `false`，所有 `x < 0` / `x > MAX` 形式的判断都放它过去）
+- `Rectangle(0.0, 0.0)` 是合法的（两个 0 都得允许），`area` → `0.0`、`isSquare` → `true`
 - `Rectangle(3.0, 4.0).describe()` → **必须恰好等于** `"3.0x4.0 area=12.0 perimeter=14.0 square=false"`
 - `Rectangle(2.0, 2.0).describe()` → `"2.0x2.0 area=4.0 perimeter=8.0 square=true"`
   （原标准只写了"包含 `12.0` 和 `14.0`"，格式写错也能通过 —— 现在改成全等比较）
