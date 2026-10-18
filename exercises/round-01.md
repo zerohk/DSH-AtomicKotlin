@@ -530,6 +530,10 @@ E:\Kotlin\DSH-AtomicKotlin\
   - `set(value)` 换算回摄氏，并经 `celsius` 的 setter 走一遍校验（**即：不要重复写校验逻辑**）
 - `fun describe(): String` —— 形如 `"25.0°C / 77.0°F"`
 
+> 🆘 **如果 `init` 块、自定义 `get`/`set`、"委托"这三样里任何一个不会写**，先去做 [Part C 加练（4 道小题）](part-c-drills.md)：D1 只练 `init` 校验，D2 只练自定义 setter，D3 是**和本题结构完全一样**的重量换算题（做完这题，本题骨架就会写了），D4 练 `field` 关键字。
+>
+> ⚠️ 本题最容易踩的坑：在 `set(value)` 里写 `this.celsius = value` —— 这会**再次调用 setter 自己**，无限递归直到 `StackOverflowError`。setter 内部要给**背后的存储**赋值（`celsiusValue = value`），而不是给属性本身赋值。
+
 **约束**：
 - `fahrenheit` 的 setter 必须"委托"给 `celsius` 的 setter 完成校验（把 `celsius = ...` 写在里面），这是本题的核心练习点：**两个属性共享同一套不变式**。
 - 不许用 `data class`、不许 `require()`、不许 lambda、不许 `when`。

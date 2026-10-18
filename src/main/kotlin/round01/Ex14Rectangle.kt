@@ -8,17 +8,19 @@ package round01
 class Rectangle(val width: Double, val height: Double) {
 
     init {
-        TODO("TODO: width / height 不可为负，且必须是有限数")
+        if (!width.isFinite() || !height.isFinite() || width < 0 || height < 0)
+            throw IllegalArgumentException("width/height 必须是非负的有限数")
     }
 
     val area: Double
-        get() = TODO()
+        get() = width * height
 
     val perimeter: Double
-        get() = TODO()
+        get() = 2 * (width + height)
 
     val isSquare: Boolean
-        get() = TODO()
+        get() = width == height
 
-    fun describe(): String = TODO()
+    fun describe(): String =
+        "${width}x$height area=${this.area} perimeter=${this.perimeter} square=${this.isSquare}"
 }
