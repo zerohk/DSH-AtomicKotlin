@@ -544,6 +544,8 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `Temperature(0.0).fahrenheit` → `32.0`
 - 令 `t = Temperature(25.0)`；`t.fahrenheit = 212.0` 后 `t.celsius` → `100.0`
 - `t.celsius = -300.0` 抛 `IllegalArgumentException`，且**抛异常后 `t.celsius` 保持原值不变**（不变式不能被破坏）
+- ⚠️ **`fahrenheit` 的校验必须由"委托"间接生效**：令 `t = Temperature(25.0)`，`t.fahrenheit = -1000.0`（即 -573°C，远低于绝对零度）**必须抛 `IllegalArgumentException`**，且 `t.celsius` 保持不变。
+  这条是专门用来抓"`fahrenheit` 的 setter 直接写 backing property、绕过了 `celsius` 的 setter"的：若写成 `celsiusValue = (value - 32.0) * 5 / 9`，赋值会**静默成功**并把内部状态改成 `-573.33...`，而上面 `212.0` 那条用例**完全测不出来**（它无论走不走校验都能得到 100.0）。
 - `Temperature(-300.0)` 抛 `IllegalArgumentException`
 - `Temperature(25.0).describe()` → **必须恰好等于** `"25.0°C / 77.0°F"`
 - `Temperature(0.0).describe()` → `"0.0°C / 32.0°F"`
