@@ -631,7 +631,9 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `fun pop(): Int` —— 空栈时抛 `IllegalStateException("栈为空")`
 - `fun peek(): Int` —— 空栈时抛 `IllegalStateException("栈为空")`
 - `fun size(): Int`
-- `fun isEmpty(): Boolean`：注意 —— **不能用 `items.isEmpty()` 直接返回**？不，这个可以用；但要求你另写一个 `isEmptyByHand()`，用 `size` 手工判断，体会两者区别
+- `fun isEmpty(): Boolean` —— 直接返回 `items.isEmpty()` 即可（标准库写法，本题**允许**这样用）
+- `fun isEmptyByHand(): Boolean` —— **这一个是纯粹的"对照练习"**：不许用 `items.isEmpty()`，只能靠 `size` 判断（`items.size == 0` 或 `size() == 0`）。
+  目的只有一个：让你亲眼确认 **`isEmpty()` 本质上就是 `size == 0` 的语法糖**，两者永远是同一件事的两种说法。它在真实代码里没有存在价值，写完就懂了，不必纠结。
 - `fun contains(value: Int): Boolean` —— 手工循环查找，**不许用 `items.contains()`**
 - `fun toList(): List<Int>` —— 返回一个**快照副本**：调用方修改它不能影响栈内部
 - `fun clear()`
