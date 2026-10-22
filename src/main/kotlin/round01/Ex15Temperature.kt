@@ -13,14 +13,19 @@ class Temperature(celsius: Double) {
     var celsius: Double
         get() = celsiusValue
         set(value) {
-            TODO("TODO: 校验 value >= -273.15（否则抛 IllegalArgumentException），再写入 celsiusValue")
+            if (value < -273.15) throw IllegalArgumentException("低于绝对零度")
+            celsiusValue = value
         }
+
+    init {
+        this.celsius = celsius
+    }
 
     var fahrenheit: Double
-        get() = TODO("TODO: 由 celsiusValue 换算得到")
+        get() = celsiusValue * 9 / 5 + 32.0
         set(value) {
-            TODO("TODO: 换算成摄氏，再委托给 celsius 的 setter")
+            celsius = (value - 32.0) * 5 / 9
         }
 
-    fun describe(): String = TODO()
+    fun describe(): String = "${celsius}°C / ${fahrenheit}°F"
 }

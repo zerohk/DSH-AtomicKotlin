@@ -13,13 +13,27 @@ class BankAccount(val owner: String) {
         get() = balanceInCents
 
     // cents 必须 > 0，否则抛 IllegalArgumentException
-    fun deposit(cents: Long) { TODO() }
+    fun deposit(cents: Long) {
+        if (cents <= 0) throw IllegalArgumentException("金额不能小于等于0")
+        balanceInCents += cents
+    }
 
     // cents 必须 > 0；余额不足抛 IllegalStateException("余额不足")
-    fun withdraw(cents: Long) { TODO() }
+    fun withdraw(cents: Long) {
+        if (cents <= 0) throw IllegalArgumentException("金额不能小于等于0")
+        if (cents > balanceInCents) throw IllegalStateException("余额不足")
+        balanceInCents -= cents
+    }
 
     // 转账：任一环节失败时两边余额都必须保持原样
-    fun transferTo(other: BankAccount, cents: Long) { TODO() }
+    fun transferTo(other: BankAccount, cents: Long) {
+        if (cents <= 0) throw IllegalArgumentException("金额不能小于等于0")
+        if (cents > this.balanceInCents) throw IllegalStateException("余额不足")
+        this.withdraw(cents)
+        other.deposit(cents)
+    }
 
-    fun statement(): String = TODO()
+    fun statement(): String = "$owner: $balanceInCents 分"
 }
+
+

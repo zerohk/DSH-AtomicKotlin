@@ -21,7 +21,7 @@ package round01.drills
 class Score(val value: Int) {
 
     init {
-        TODO("TODO: 校验 value in 0..100，否则抛 IllegalArgumentException")
+        if (value !in 0..100) throw IllegalArgumentException("$value 必须在[0,100]")
     }
 
     // 下面这个已经写好了，作为"计算属性"的示范（注意：没有 backing field）
@@ -44,13 +44,14 @@ class Tank(val capacity: Int) {
     private var levelValue: Int = 0
 
     init {
-        TODO("TODO: capacity 必须 > 0")
+        if (capacity <= 0) throw IllegalArgumentException("capacity必须大于0")
     }
 
     var level: Int
         get() = levelValue
         set(value) {
-            TODO("TODO: 先校验 0..capacity，再写 levelValue")
+            if (value !in 0..capacity) throw IllegalArgumentException("value 必须在[0,capacity]范围内")
+            levelValue = value
         }
 
     val isEmpty: Boolean
@@ -82,20 +83,21 @@ class Weight(grams: Double) {
     var grams: Double
         get() = gramsValue
         set(value) {
-            TODO("TODO: 校验 >= 0 且有限，再写 gramsValue")
+            if (value < 0 || !value.isFinite()) throw IllegalArgumentException("值有误")
+            gramsValue = value
         }
 
     var kilograms: Double
         get() = gramsValue / 1000.0
         set(value) {
-            TODO("TODO: 换算成克，然后交给 grams 的 setter")
+            grams = value * 1000.0
         }
 
     init {
-        TODO("TODO: 构造时也走 grams 的 setter，别忘了")
+        this.grams = grams
     }
 
-    fun describe(): String = TODO("TODO: \"\${grams}g / \${kilograms}kg\"")
+    fun describe(): String = "${grams}g / ${kilograms}kg"
 }
 
 
@@ -121,14 +123,18 @@ class Account {
 
     var balance: Int = 0
         set(value) {
-            TODO("TODO: value < 0 抛 IllegalArgumentException，否则 field = value")
+            if (value < 0) throw IllegalArgumentException("$value 小于0")
+            field = value
         }
 
     fun deposit(amount: Int) {
-        TODO("TODO: amount <= 0 抛 IllegalArgumentException，否则 balance += amount")
+        if (amount <= 0) throw IllegalArgumentException("$amount 小于0")
+        balance += amount
     }
 
     fun withdraw(amount: Int) {
-        TODO("TODO: 金额非法抛 IllegalArgumentException；余额不足抛 IllegalStateException；否则 balance -= amount")
+        if (amount <= 0) throw IllegalArgumentException("金额$amount 小于0")
+        if (amount > balance) throw IllegalStateException("余额不足")
+        balance -= amount
     }
 }

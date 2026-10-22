@@ -134,18 +134,22 @@ fun main() {
     }                                        // 你自己的代码里请改成先判空或用其它方式
     checkTrue("Ex09 fib(-1) 抛 IllegalArgumentException", threw)
     // ---------- 集合类题目 ----------
-    checkTrue("Ex10 isPrime(2)",isPrime(2))
-    checkTrue("Ex10 isPrime(3)",isPrime(3))
-    checkTrue("Ex10 isPrime(97)",isPrime(97))
-    checkTrue("Ex10 isPrime(Int.MAX_VALUE))",isPrime(Int.MAX_VALUE))
-    checkFalse("Ex10 isPrime(1)",isPrime(1))
-    checkFalse("Ex10 isPrime(4)",isPrime(4))
-    checkFalse("Ex10 isPrime(100)",isPrime(100))
-     checkIntList("Ex10 primesUpTo(20)", listOf(2,3,5,7,11,13,17,19), primesUpTo(20))
-     checkIntList("Ex10 primesUpTo(1)", listOf(), primesUpTo(1))
-     checkIntList("Ex10 primesUpTo(2)", listOf(2), primesUpTo(2))
+    checkTrue("Ex10 isPrime(2)", isPrime(2))
+    checkTrue("Ex10 isPrime(3)", isPrime(3))
+    checkTrue("Ex10 isPrime(97)", isPrime(97))
+    checkTrue("Ex10 isPrime(Int.MAX_VALUE))", isPrime(Int.MAX_VALUE))
+    checkFalse("Ex10 isPrime(1)", isPrime(1))
+    checkFalse("Ex10 isPrime(4)", isPrime(4))
+    checkFalse("Ex10 isPrime(100)", isPrime(100))
+    checkIntList("Ex10 primesUpTo(20)", listOf(2, 3, 5, 7, 11, 13, 17, 19), primesUpTo(20))
+    checkIntList("Ex10 primesUpTo(1)", listOf(), primesUpTo(1))
+    checkIntList("Ex10 primesUpTo(2)", listOf(2), primesUpTo(2))
     // checkIntSet("Ex21 intersectionOf", setOf(2,3), intersectionOf(setOf(1,2,3), setOf(2,3,4)))
     // checkStringIntMap("Ex22 wordCount", mapOf("a" to 3, "b" to 2, "c" to 1), wordCount("a b a c b a"))
-
+    checkDouble("Ex15 Temperature(25.0).fahrenheit", 77.0, Temperature(25.0).fahrenheit)
+    checkDouble("Ex15 Temperature(0.0).fahrenheit", 32.0, Temperature(0.0).fahrenheit)
+    var t = Temperature(25.0)
+    t.fahrenheit = 212.0
+    checkDouble("Ex15 t.celsius",100.0,t.celsius)
     checkSummary()
 }
