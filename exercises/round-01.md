@@ -778,7 +778,10 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `mostFrequent(wordCount("a b a c b a"))` → `"a"`
 - 并列测试：`mostFrequent(mapOf("b" to 1, "a" to 1))` → `"a"`（字典序最小）
 - `wordsWithCount(wordCount("a b a c b a"), 1)` → `{c}`
+- `wordsWithCount(wordCount("a b a c b a"), 5)` → `{}`（没有词出现 5 次时返回空集，不抛异常）
 - `totalWords(wordCount("a b a c b a"))` → `6`
+- `totalWords(mapOf())` → `0`
+- ⚠️ `mostFrequent(mapOf())` 抛 `IllegalArgumentException`（空 Map 没有"最频繁"，必须显式拒绝）
 
 ---
 
@@ -839,6 +842,8 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `"john ronald reuel tolkien".initials()` → `"J.R.R.T."`
 - `"  a   b  c ".wordCount()` → `3`；`"".wordCount()` → `0`
 - `"abc".reverseByHand()` → `"cba"`；`"".reverseByHand()` → `""`
+- `"".isPalindrome()` → `true`（空串按回文处理，与第 8 题的约定一致）
+- `"".initials()` → `""`（没有单词时返回空串，**不是** `"."`，也不是异常）
 
 ---
 
@@ -878,6 +883,8 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `1234.digitsSum()` → `10`；`(-1234).digitsSum()` → `10`
 - `0.digitsCount()` → `1`；`1234.digitsCount()` → `4`
 - `sumOfAllPrimesUpTo(10)` → `17L`（2+3+5+7）
+- `sumOfAllPrimesUpTo(1)` → `0L`；`sumOfAllPrimesUpTo(0)` → `0L`（没有素数时返回 0，**不抛异常**）
+- `0.digitsSum()` → `0`
 - `demoImportedExtensions()` 返回的字符串包含 `even=true`
 
 ---
@@ -910,6 +917,12 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `listOf(1, 2, 1).countOccurrences(1)` → `2`
 - `listOf(3, 1, 2).sortedByHand()` → `[1, 2, 3]`，且**原列表仍为 `[3, 1, 2]`**
 - `listOf(1, 2, 3).isSortedAscending()` → `true`；`listOf(1, 3, 2)` → `false`
+- ⚠️ 空列表的约定（这几个都必须显式测）：
+  - `listOf<Int>().rangeOfValues()` 抛 `IllegalArgumentException`
+  - `listOf<Int>().median()` 抛 `IllegalArgumentException`
+  - `listOf<Int>().sortedByHand()` → `[]`（不抛异常）
+  - `listOf<Int>().isSortedAscending()` → `true`；`listOf(7).isSortedAscending()` → `true`（空/单元素视为已排序）
+- `listOf(1, 2, 1).countOccurrences(9)` → `0`（找不到时返回 0，不是异常）
 
 > `secondMax` 是最容易写错的一题：请用一次遍历维护"最大"和"第二大"两个变量，并特意测试 `[5, 5, 3]` 这种有重复最大值的输入。
 
@@ -958,6 +971,9 @@ class Product(val name: String, val priceInCents: Long)
 - `listOf(Product("B",100), Product("A",100)).mostExpensive().name` → `"A"`（并列取字典序最小）
 - `Product("Widget", 1999).describe()` → **必须恰好等于** `"Widget: 19.99 元"`
 - 折扣边界：`Product("A", 1999).withDiscount(0).priceInCents` → `1999L`；`withDiscount(100).priceInCents` → `0L`
+- `Product("A", 1999).withDiscount(-1)` 抛异常（**小于 0 也要拒绝**，不能只判大于 100）
+- `listOf<Product>().mostExpensive()` 抛 `IllegalArgumentException`（空列表没有"最贵"）
+- `listOf<Product>().totalPriceInCents()` → `0L`（空列表求和为 0，不抛异常）
 
 ---
 
@@ -992,6 +1008,8 @@ class Product(val name: String, val priceInCents: Long)
   （`input.txt` 前面没有元素；`out.txt` 紧跟在 flag `-o` 之后所以是值；`extra` 前一个是 `out.txt`，不是 flag，所以它算位置参数）
 - `listOf("-a", "1", "-b", "2").toFlagMap()` → 内容等价于 `{-a=1, -b=2}`
 - `listOf("-a").toFlagMap()` 抛 `IllegalArgumentException`
+- `hasFlag`：`listOf("-a", "1").hasFlag("-a")` → `true`；`hasFlag("-z")` → `false`；`listOf<String>().hasFlag("-a")` → `false`
+- 空列表的约定：`listOf<String>().flagNames()` → `{}`；`.positionalArgs()` → `[]`；`.toFlagMap()` → `{}`（三者都不抛异常）
 
 > 这题把"语义边界"摊开给你看：`positionalArgs` 的规则已经给死（往前看一格），但**"flag 后面没值"这件事在不同函数里的处理方式并不相同** —— 它是 `toFlagMap` 的错误条件，却不影响 `positionalArgs`（`-o` 后面没值，只意味着 `-o` 是个 flag，不产生任何位置参数）。
 > 请在代码顶部用注释写下这条规则，并保证实现与之一致 —— **"先定义语义、再实现、再自测"是工程能力，不只是语法能力。**
@@ -1045,6 +1063,10 @@ class Product(val name: String, val priceInCents: Long)
 - 故意给一条只有 2 个字段的 `add` 命令：程序**输出错误行且继续运行**，不抛异常到顶层
 - `quit` 之后的命令不被执行
 - 借阅人为空字符串时 `borrow` 返回 `false`
+- ⚠️ **`summary` 必须全等**：`Book("978-7-111", "Kotlin 实战", "张三", true).summary` → **恰好** `"[978-7-111] Kotlin 实战 / 张三 / 可借"`；把 `available` 改成 `false` 后尾段必须是 `"已借出"`（即 `"[978-7-111] Kotlin 实战 / 张三 / 已借出"`）
+- `findByAuthor` **大小写不敏感**：作者存为 `"Zhang San"` 时，用 `"zhang san"` 和 `"ZHANG SAN"` 查询都要能命中；查不存在的作者返回空列表
+- `titlesOfAvailable()` 只包含当前可借书的 title（已借出的不出现）；全部借出后返回空集
+- `isFullyBorrowed()` 的三种情况：**空库 → `false`**（"空"不等于"全部借出"）；有书且全部借出 → `true`；有书且还有可借 → `false`
 
 ---
 
@@ -1062,7 +1084,10 @@ class Product(val name: String, val priceInCents: Long)
    - `val count: Int`、`val average: Double`、`val highest: Int`、`val lowest: Int` —— **全部为计算属性**（`get() = ...`），空数据时 `average` 等抛 `IllegalStateException`
    - `fun scoresOf(student: Student): List<Int>`
    - `fun passRate(): Double` —— 及格线为 `maxScore * 0.6`（**取整规则自己定义并写进注释**）
-   - `fun distribution(buckets: Int): Map<String, Int>` —— 把 `0..maxScore` 等分成 `buckets` 段，返回每段的计数；key 形如 `"0-19"`
+   - `fun distribution(buckets: Int): Map<String, Int>` —— 把 `0..maxScore` 切成 `buckets` 段并计数。
+     **切分规则（照此实现，避免歧义）**：段宽 `width = maxScore / buckets`（整数除法）；第 `i` 段（`i` 从 0 起）覆盖 `[i*width, i*width + width - 1]`，**最后一段的上界取 `maxScore`**；key 形如 `"起-止"`。
+     例：`maxScore = 100, buckets = 5` 时 key 依次为 `"0-19"`、`"20-39"`、`"40-59"`、`"60-79"`、`"80-100"`。
+     `buckets <= 0`，或 `maxScore / buckets == 0`（段宽退化为 0）时抛 `IllegalArgumentException`。
    - `fun ranking(): List<Student>` —— 按**平均分降序**；平均分相同时按 **id 升序**
    - `fun report(): String` —— 多行报表
 3. 扩展函数：
@@ -1079,6 +1104,12 @@ class Product(val name: String, val priceInCents: Long)
 - `passRate()` 在全部及格时 → `1.0`，全部不及格时 → `0.0`
 - `summarize(10, 20, 90)` 的返回包含 `n=3`、`min=10`、`max=90`
 - `topN(0)` / `topN(-1)` 抛异常
+- `scoresOf(student)` 返回该学生的全部成绩，**顺序与添加顺序一致**（如先加 90 再加 70，返回 `[90, 70]`）；没加过成绩的学生返回 `[]`
+- `highest` / `lowest` 正确；**空数据时与 `average` 一样抛 `IllegalStateException`**
+- `median2`：`listOf(1, 2, 3, 4).median2()` → `2.5`；`listOf(3, 1, 2).median2()` → `2.0`
+- `studentsById()` → 已登记学生的 id 集合
+- `distribution(5)`（`maxScore = 100`）的 key 集合必须**恰好是** `{"0-19", "20-39", "40-59", "60-79", "80-100"}`，且各段计数之和等于总成绩数
+- `distribution(0)`、`distribution(-1)` 抛 `IllegalArgumentException`；`maxScore = 10` 时 `distribution(20)` 也抛（段宽为 0）
 
 ---
 
@@ -1095,7 +1126,7 @@ class Product(val name: String, val priceInCents: Long)
    - `val balanceCents: Long` 只读；**不允许外部写入**
    - `fun deposit(cents: Long)`、`fun withdraw(cents: Long)`（余额不足抛 `IllegalStateException`）
    - `private val history: MutableList<String>` + `fun historySnapshot(): List<String>`（返回**副本**）
-   - `fun statement(): String`
+   - `fun statement(): String` —— 形如 `"1001 Ada: 7000 分"`，即 `"<账号> <持有人>: <余额> 分"`
 2. `class Bank`：
    - `private val accounts: MutableMap<String, Account>`
    - `private val closedNumbers: MutableSet<String>` —— 已销户的账号（**销户后不允许重新开户**）
@@ -1121,6 +1152,9 @@ class Product(val name: String, val priceInCents: Long)
 - `withdraw` 负数金额抛异常
 - `historySnapshot()` 返回的列表被外部修改后，账户内部历史不受影响
 - `quit` 后停止处理
+- `Account("1001", "Ada", 7000).statement()` → **恰好** `"1001 Ada: 7000 分"`
+- `topAccounts(2)` 按余额**降序**；余额并列时按**账号升序**；`topAccounts(0)`、`topAccounts(-1)` 抛 `IllegalArgumentException`；`topAccounts(99)`（超过账户数）返回全部，不抛异常
+- `allOwners()` → 所有持有人名字的集合；`isKnown("1001")` → `true`；`isKnown("9999")` → `false`
 
 ---
 
@@ -1164,6 +1198,8 @@ class Product(val name: String, val priceInCents: Long)
 - `render()` 恰好 3 行、每行恰好 5 个字符（`X|O|.` 形式）
 - `lineIndices()` 返回 **8** 条线，每条线恰好 3 个下标
 - 有人获胜后，后续命令不再改变棋盘（用 `runGame` 验证）
+- `availableMoves()`：初始 → `[0, 1, 2, 3, 4, 5, 6, 7, 8]`（9 个）；`place(1, 1, 'X')` 后 → 8 个，且**不含下标 4**（`1 * 3 + 1 = 4`）；棋盘下满后 → `[]`
+- `marksCount('X')` / `marksCount('O')`：落 3 个 X、2 个 O 后分别 → `3`、`2`；空棋盘都是 `0`
 
 > 小提示：`place` 越界检查要**先**做（`row` / `col` 在 `0..2`），再做占用检查 —— 顺序错了会出现"下标越界异常泄漏到调用方"，这是很典型的 bug。
 
@@ -1175,7 +1211,7 @@ class Product(val name: String, val priceInCents: Long)
 - [ ] `gradlew.bat run`（`Main.kt`）里每道题都至少跑过一次，`Check` 输出符合"验收标准"
 - [ ] 全项目搜索一遍：**没有出现** `when`、`?:`、`!!`、`data class`、`require(`、`break`、`continue`、`recursive`、`filter`、`map {`、`forEach`、`sorted`、`joinToString`
 - [ ] 所有"不该被外部修改"的状态都是 `private`（余额、栈内部列表、棋格……）
-- [ ] 所有"抛异常后状态不变"的断言都真的自测过（第 15、16、28 题 + P1、P3）
+- [ ] 所有"抛异常后状态不变"的断言都真的自测过（第 15、16、17 题 + P1、P3）
 - [ ] 每个扩展函数都写在**被扩展类的源码之外**（第 27 题尤其要注意：`Product` 源码一行都不许改）
 - [ ] 每个 `TODO()` 都被替换掉了（搜一下 `TODO` 还剩几个）
 
