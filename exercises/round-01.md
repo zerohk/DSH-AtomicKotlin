@@ -761,7 +761,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 
 **任务**：
 
-- `wordCount(text: String): Map<String, Int>` —— 按空白切分，**忽略空串**，统计每个词出现次数
+- `wordCount(text: String): Map<String, Int>` —— 按**空格**切分（用 `split(" ")`，不处理制表符/换行），**忽略空串**，统计每个词出现次数
 - `mostFrequent(counts: Map<String, Int>): String` —— 返回出现次数最多的词；**并列时返回字典序最小的那个**；空 Map 抛 `IllegalArgumentException`
 - `wordsWithCount(counts: Map<String, Int>, n: Int): Set<String>` —— 返回恰好出现 n 次的词集合
 - `totalWords(counts: Map<String, Int>): Int` —— 所有词频之和
@@ -826,8 +826,9 @@ E:\Kotlin\DSH-AtomicKotlin\
 **任务**：全部实现为 **`String` 的扩展函数**（必须是扩展，不许改成 `fun foo(s: String)` 的普通函数）：
 
 - `fun String.isPalindrome(): Boolean` —— **忽略大小写与所有空格**
-- `fun String.shout(): String` —— 返回大写并在末尾加 `!`；空串返回 `"!"`
-- `fun String.initials(): String` —— 取每个单词首字母大写，用 `.` 分隔并**以 `.` 结尾**，如 `"john ronald reuel tolkien"` → `"J.R.R.T."`
+- `fun String.shout(): String` —— 返回大写并在末尾加 `!`；空串返回 `"!"`；**若原串已以 `!` 结尾，不再追加**（`"Hi!".shout()` → `"HI!"`，不是 `"HI!!"`）
+- `fun String.initials(): String` —— 取每个单词首字母大写，用 `.` 分隔并**以 `.` 结尾**，如 `"john ronald reuel tolkien"` → `"J.R.R.T."`。
+  **连续空格视为一个分隔**（`"  a   b ".initials()` → `"A.B."`）；空串返回 `""`
 - `fun String.wordCount(): Int` —— 统计单词个数（连续空格算一个分隔）
 - `fun String.reverseByHand(): String` —— 手工反转（不许用 `reversed()`）
 
@@ -840,8 +841,8 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `"level".isPalindrome()` → `true`；`"Level".isPalindrome()` → `true`（忽略大小写）
 - `"A man a plan a canal Panama".isPalindrome()` → `true`
 - `"hello".isPalindrome()` → `false`
-- `"Hello".shout()` → `"HELLO!"`；`"".shout()` → `"!"`
-- `"john ronald reuel tolkien".initials()` → `"J.R.R.T."`
+- `"Hello".shout()` → `"HELLO!"`；`"".shout()` → `"!"`；`"Hi!".shout()` → `"HI!"`（已有 `!` 不重复加）
+- `"john ronald reuel tolkien".initials()` → `"J.R.R.T."`；`"  a   b ".initials()` → `"A.B."`；`"".initials()` → `""`
 - `"  a   b  c ".wordCount()` → `3`；`"".wordCount()` → `0`
 - `"abc".reverseByHand()` → `"cba"`；`"".reverseByHand()` → `""`
 - `"".isPalindrome()` → `true`（空串按回文处理，与第 8 题的约定一致）
@@ -870,7 +871,8 @@ E:\Kotlin\DSH-AtomicKotlin\
 
 **(b)** 在 `package round01` 的 `Ex25IntExt.kt` 中 **import 这些扩展函数** 并实现：
 
-- `fun demoImportedExtensions(): String` —— 依次调用上面 6 个扩展，返回一行摘要，如 `"4 even=true odd=false prime=false digitsSum=4 digitsCount=1"`
+- `fun demoImportedExtensions(): String` —— 对整数 `4` 依次调用**全部 6 个**扩展，返回**恰好**下面这一行（字段顺序、空格、`=` 都不许变）：
+  `"4 even=true odd=false prime=false fact=24 digitsSum=4 digitsCount=1"`
 - `fun sumOfAllPrimesUpTo(limit: Int): Long` —— 在循环里调用 `isPrimeX()` 累加
 
 **约束**：
@@ -887,7 +889,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `sumOfAllPrimesUpTo(10)` → `17L`（2+3+5+7）
 - `sumOfAllPrimesUpTo(1)` → `0L`；`sumOfAllPrimesUpTo(0)` → `0L`（没有素数时返回 0，**不抛异常**）
 - `0.digitsSum()` → `0`
-- `demoImportedExtensions()` 返回的字符串包含 `even=true`
+- `demoImportedExtensions()` → **必须恰好等于** `"4 even=true odd=false prime=false fact=24 digitsSum=4 digitsCount=1"`
 
 ---
 
@@ -990,7 +992,7 @@ class Product(val name: String, val priceInCents: Long)
 - `fun List<String>.valueOfFlag(flag: String): String` —— 返回紧随该 flag 之后的那个元素；flag 不存在、或后面没有元素、或该 flag 非法时抛 `IllegalArgumentException`
 - `fun List<String>.hasFlag(flag: String): Boolean`
 - `fun List<String>.positionalArgs(): List<String>` —— 返回"位置参数"：自身不是合法 flag，**且**它前面紧邻的元素也不是合法 flag（也就是它不是任何 flag 的值）。按原顺序返回
-- `fun List<String>.toFlagMap(): Map<String, String>` —— 把 `["-a","1","-b","2"]` 变成 `{-a=1, -b=2}`；遇到"flag 后面没有值"时抛 `IllegalArgumentException`
+- `fun List<String>.toFlagMap(): Map<String, String>` —— 把 `["-a","1","-b","2"]` 变成 `{-a=1, -b=2}`；遇到"flag 后面没有值"时抛 `IllegalArgumentException`；**同一 flag 出现多次时，以最后一次的值为准**（`["-a","1","-a","2"]` → `{-a=2}`）
 
 **约束**：
 - 不许用 `Regex`、不许 lambda、不许 `when`、不许解构（`toFlagMap` 里遍历 Map 时用 `keys`）、不许 `break`/`continue`。
@@ -1012,6 +1014,7 @@ class Product(val name: String, val priceInCents: Long)
 - `listOf("-a").toFlagMap()` 抛 `IllegalArgumentException`
 - `hasFlag`：`listOf("-a", "1").hasFlag("-a")` → `true`；`hasFlag("-z")` → `false`；`listOf<String>().hasFlag("-a")` → `false`
 - 空列表的约定：`listOf<String>().flagNames()` → `{}`；`.positionalArgs()` → `[]`；`.toFlagMap()` → `{}`（三者都不抛异常）
+- `listOf("-a", "1", "-a", "2").toFlagMap()` → `{-a=2}`（重复 flag 取最后一次）
 
 > 这题把"语义边界"摊开给你看：`positionalArgs` 的规则已经给死（往前看一格），但**"flag 后面没值"这件事在不同函数里的处理方式并不相同** —— 它是 `toFlagMap` 的错误条件，却不影响 `positionalArgs`（`-o` 后面没值，只意味着 `-o` 是个 flag，不产生任何位置参数）。
 > 请在代码顶部用注释写下这条规则，并保证实现与之一致 —— **"先定义语义、再实现、再自测"是工程能力，不只是语法能力。**
@@ -1048,13 +1051,23 @@ class Product(val name: String, val priceInCents: Long)
    - `fun findByAuthor(author: String): List<Book>` —— 手工循环，大小写不敏感
    - `fun availableBooks(): List<Book>`
    - `fun borrowedBooks(): List<Book>`
-   - `fun report(): String` —— 多行统计报表：总数、可借数、已借数、以及每个借阅人和他借的书
+   - `fun report(): String` —— 多行统计报表。**每行一个事实**，用 `"\n"` 连接、末尾不带换行。必须包含：
+     - `"总数: <书的总数>"`
+     - `"可借: <当前可借数>"`
+     - `"已借: <当前已借数>"`
+     - 每个借阅人一行：`"借阅人 <名字>: <该人借的 isbn，用半角逗号分隔>"`（没借书的人不出现）
+     行的先后顺序不限；除上述内容外允许有别的行。空库时前两行必须是 `"总数: 0"`、`"可借: 0"`、`"已借: 0"`
 3. 扩展函数（**必须写在 `Library` 类之外**）：
    - `fun Library.titlesOfAvailable(): Set<String>`
    - `fun Library.isFullyBorrowed(): Boolean` —— 非空且全部借出
 4. 命令解析：`fun runLibrary(commands: List<String>): String`
    - 支持 `add <isbn> <title> <author>`、`borrow <isbn> <name>`、`return <isbn>`、`list`、`report`、`quit`
-   - 非法命令要输出可读的错误行（**不许让整个程序崩掉**）；`quit` 之后停止处理后续命令
+   - **返回值的契约（写死，避免"写完了不知道对不对"）**：
+     - 返回值 = 每条命令产生的输出用 `"\n"` 连接，**末尾不带换行**
+     - 每条非 `quit` 命令**至少产生一行**输出
+     - 非法命令（字段不足、命令不认识、参数非法）产生**恰好一行**以 `"错误: "` 开头的内容，然后继续处理下一条
+     - 遇到 `quit` 立即停止：`quit` 自身不产生输出，其后所有命令都不产生任何输出
+     - 整段调用**不许抛异常到调用方**（任何输入都不能让它崩）
    - 注意：这里**不能用 `break`**！请用 `while` 条件 + 布尔标志（如 `var running = true`）实现"遇到 quit 就停"
 
 **验收标准（请务必自测这几条）**：
@@ -1064,6 +1077,10 @@ class Product(val name: String, val priceInCents: Long)
 - `giveBack` 后该书重新变为可借
 - 故意给一条只有 2 个字段的 `add` 命令：程序**输出错误行且继续运行**，不抛异常到顶层
 - `quit` 之后的命令不被执行
+- `report()` 空库时必须含 `"总数: 0"`、`"可借: 0"`、`"已借: 0"` 三行
+- `runLibrary(listOf("add A B"))`（`add` 字段不足）返回值**恰好一行**，且以 `"错误: "` 开头
+- `runLibrary(listOf("list", "quit", "list"))`：`quit` 之后的输出不再出现（即返回值里只含第一个 `list` 和 `quit` 之前的内容）
+- 随便给一条乱码命令（如 `"@@@"`）：**不抛异常到调用方**，只产生一行 `"错误: "` 开头的输出
 - 借阅人为空字符串时 `borrow` 返回 `false`
 - ⚠️ **`summary` 必须全等**：`Book("978-7-111", "Kotlin 实战", "张三", true).summary` → **恰好** `"[978-7-111] Kotlin 实战 / 张三 / 可借"`；把 `available` 改成 `false` 后尾段必须是 `"已借出"`（即 `"[978-7-111] Kotlin 实战 / 张三 / 已借出"`）
 - `findByAuthor` **大小写不敏感**：作者存为 `"Zhang San"` 时，用 `"zhang san"` 和 `"ZHANG SAN"` 查询都要能命中；查不存在的作者返回空列表
@@ -1091,7 +1108,9 @@ class Product(val name: String, val priceInCents: Long)
      例：`maxScore = 100, buckets = 5` 时 key 依次为 `"0-19"`、`"20-39"`、`"40-59"`、`"60-79"`、`"80-100"`。
      `buckets <= 0`，或 `maxScore / buckets == 0`（段宽退化为 0）时抛 `IllegalArgumentException`。
    - `fun ranking(): List<Student>` —— 按**平均分降序**；平均分相同时按 **id 升序**
-   - `fun report(): String` —— 多行报表
+   - `fun report(): String` —— 多行报表，每行一个事实，用 `"\n"` 连接、末尾不带换行。必须包含这五行（**前缀逐字一致**、数值正确、顺序不限）：
+     `"学生数: "`、`"成绩数: "`、`"平均分: "`、`"最高: "`、`"最低: "`。
+     空数据时只要求出现 `"学生数: 0"` 与 `"成绩数: 0"` 两行（平均分等可省略）
 3. 扩展函数：
    - `fun List<Int>.median2(): Double` —— 直接复用你第 26 题手工排序的思路（**注意：这里函数名不能和第 26 题重名冲突，所以叫 `median2`**）
    - `fun ScoreSheet.topN(n: Int): List<Student>` —— 前 n 名；`n` 非法时抛 `IllegalArgumentException`
@@ -1133,16 +1152,20 @@ class Product(val name: String, val priceInCents: Long)
    - `private val accounts: MutableMap<String, Account>`
    - `private val closedNumbers: MutableSet<String>` —— 已销户的账号（**销户后不允许重新开户**）
    - `fun open(number: String, owner: String, initial: Long): Boolean` —— 已存在或已销户时返回 `false`
-   - `fun close(number: String): Boolean` —— 余额不为 0 时返回 `false`（并要求在 `report()` 里说明原因）
+   - `fun close(number: String): Boolean` —— 余额不为 0 时返回 `false` 且**状态完全不变**；成功销户时把账号加入 `closedNumbers`
+     （旧版这里写了"并要求在 `report()` 里说明原因"，那条无法实现 —— `report()` 拿不到失败历史，已删除）
    - `fun transfer(from: String, to: String, cents: Long): Boolean` —— **任一环节失败时两边余额都必须保持原样**（先校验全部前置条件，再动手扣款）
    - `fun totalAssets(): Long`
    - `fun topAccounts(n: Int): List<Account>` —— 按余额降序，余额并列时按账号升序；`n` 非法抛异常
-   - `fun report(): String`
+   - `fun report(): String` —— 多行报表，用 `"\n"` 连接、末尾不带换行。必须包含：
+     - 每个账户一行，内容**恰好等于**该账户 `statement()` 的返回值
+     - 最后一行：`"总资产: <totalAssets() 的返回值> 分"`
+     无账户时最后一行必须是 `"总资产: 0 分"`
 3. 扩展函数：
    - `fun Account.isZeroBalance(): Boolean` —— 注意：`balanceCents` 是公开的只读属性，所以这个扩展**能**读到它。请同时在注释里回答：**如果 `balance` 不是公开只读属性，这个扩展函数还能写吗？为什么？**（这是扩展函数边界的关键理解）
    - `fun Bank.allOwners(): Set<String>`
    - `fun Bank.isKnown(number: String): Boolean`
-4. `fun runBank(commands: List<String>): String` —— 支持 `open`、`deposit`、`withdraw`、`transfer`、`close`、`report`、`quit`；同样**不能用 `break`**，用布尔标志退出；命令解析失败要输出错误行并继续
+4. `fun runBank(commands: List<String>): String` —— 支持 `open`、`deposit`、`withdraw`、`transfer`、`close`、`report`、`quit`。**返回值契约与 P1 的 `runLibrary` 完全相同**：输出用 `"\n"` 连接、末尾不带换行；每条非 `quit` 命令至少一行；非法命令产生**恰好一行**以 `"错误: "` 开头的内容后继续；`quit` 立即停止且自身不产生输出；整段调用不许抛异常到调用方。同样**不能用 `break`**，用布尔标志退出。
 
 **验收标准**：
 - 开户后 `report()` 含该账号
@@ -1157,6 +1180,8 @@ class Product(val name: String, val priceInCents: Long)
 - `Account("1001", "Ada", 7000).statement()` → **恰好** `"1001 Ada: 7000 分"`
 - `topAccounts(2)` 按余额**降序**；余额并列时按**账号升序**；`topAccounts(0)`、`topAccounts(-1)` 抛 `IllegalArgumentException`；`topAccounts(99)`（超过账户数）返回全部，不抛异常
 - `allOwners()` → 所有持有人名字的集合；`isKnown("1001")` → `true`；`isKnown("9999")` → `false`
+- `report()` 必须含每个账户的 `statement()` 内容，且**最后一行恰为** `"总资产: <totalAssets()> 分"`；无账户时 `report()` 最后一行是 `"总资产: 0 分"`
+- `runBank` 的契约与 `runLibrary` 相同：非法命令恰好一行 `"错误: "` 开头；`quit` 后无输出；乱码命令不抛异常到调用方
 
 ---
 
@@ -1179,15 +1204,22 @@ class Product(val name: String, val priceInCents: Long)
 2. `class Game`：
    - `private var current: Char = 'X'`
    - `fun board(): Board`（返回内部棋盘；想想这样暴露合不合适，在注释里写你的判断）
-   - `fun play(row: Int, col: Int): String` —— 返回一行结果描述；非法落子要返回错误说明而**不抛异常**；成功落子后切换 `current`
+   - `fun play(row: Int, col: Int): String` —— 返回**一行**结果，只有两种形态（必须逐字符合）：
+     - 成功：`"<mark> 落子 (row,col)"`，例如 `X 落子 (0,0)`；成功后切换 `current`
+     - 失败（越界或该格已占用）：以 `"错误: "` 开头的说明；**不抛异常、不改棋盘、不切换 `current`**
    - `fun isOver(): Boolean` —— 有胜者或棋盘已满
-   - `fun result(): String`
+   - `fun result(): String` —— 返回四种之一（逐字）：`"X 获胜"`、`"O 获胜"`、`"平局"`、`"进行中"`
    - `fun reset()`
 3. 扩展函数：
    - `fun List<Char>.hasTriple(mark: Char): Boolean` —— 判断 9 个格子里是否存在三连（行 / 列 / 对角线）
    - `fun Board.marksCount(mark: Char): Int`
    - `fun Board.lineIndices(): List<List<Int>>` —— 返回全部 8 条获胜线的下标组合（**注意：这里不能自定义泛型，但 `List<List<Int>>` 是使用已有泛型类型，允许**）
-4. `fun runGame(moves: List<String>): String` —— 每条命令形如 `"1 2"`（行 列），输出每步后的棋盘与结果；非法输入输出错误行并继续；有人获胜后停止处理（同样**不用 `break`**）
+4. `fun runGame(moves: List<String>): String` —— 每条命令形如 `"1 2"`（行 列）。**返回值契约**：
+   - 把每一步的输出用 `"\n"` 连接，末尾不带换行
+   - 每步**成功落子**后：先输出 `board().render()` 的内容，再输出一行 `result()`
+   - 非法输入（格式不对 / 越界 / 已占用）：输出**恰好一行**以 `"错误: "` 开头的内容，然后继续下一步
+   - 一旦 `isOver()` 为真，**立即停止**处理后续命令
+   - 不许抛异常到调用方；同样**不用 `break`**
 
 **验收标准**：
 - `Board()` 初始 `isFull()` → `false`，`winner()` → `'.'`
@@ -1202,6 +1234,10 @@ class Product(val name: String, val priceInCents: Long)
 - 有人获胜后，后续命令不再改变棋盘（用 `runGame` 验证）
 - `availableMoves()`：初始 → `[0, 1, 2, 3, 4, 5, 6, 7, 8]`（9 个）；`place(1, 1, 'X')` 后 → 8 个，且**不含下标 4**（`1 * 3 + 1 = 4`）；棋盘下满后 → `[]`
 - `marksCount('X')` / `marksCount('O')`：落 3 个 X、2 个 O 后分别 → `3`、`2`；空棋盘都是 `0`
+- `play(0, 0)` 的返回值**恰好**是 `"X 落子 (0,0)"`；再 `play(0, 0)` 返回值以 `"错误: "` 开头、且棋盘与 `current` 都不变
+- `result()` 只在 `{"X 获胜", "O 获胜", "平局", "进行中"}` 这四个字符串里取值
+- `runGame(listOf("0 0", "0 1", "1 0", "1 1", "2 0"))` 的返回值里 `render()` 的内容出现 **5 次**（每步一次），且以 `"X 获胜"` 结尾
+  （注意落子是 X、O 交替：X 拿 (0,0)、(1,0)、(2,0) 凑成第 0 列三连，O 拿 (0,1)、(1,1) —— X 在第 5 步获胜）
 
 > 小提示：`place` 越界检查要**先**做（`row` / `col` 在 `0..2`），再做占用检查 —— 顺序错了会出现"下标越界异常泄漏到调用方"，这是很典型的 bug。
 
