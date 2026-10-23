@@ -738,8 +738,10 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `symmetricDifferenceOf(a: Set<Int>, b: Set<Int>): Set<Int>` —— 只在一个集合里出现的元素
 
 **约束**：
-- **全部手工用循环实现**。禁止 `distinct()`、`intersect()`、`union()`、`subtract()`、`filter`、`forEach`、`map`、`toSet()` 之外的高阶函数。
-  （`toSet()`、`toList()`、`add()`、`contains()` 这些**无 lambda** 的基础函数可以用。）
+- **五个函数全部手工用循环实现**。以下写法全部**禁止**（它们正是本题要你亲手实现的东西）：
+  `distinct()`、`toSet()`、`toMutableSet()`、`intersect()`、`union()`、`subtract()`、`filter`、`forEach`、`map`、`groupBy`。
+  > 措辞更正：上一版这里写成"禁止 …… `toSet()` 之外的**高阶函数**"，同时又在下一条说"`toSet()` 可以用"，两句自相矛盾。以本条为准 —— **`toSet()` 在本题禁止**（否则 `list.toSet().toList()` 就等于 `distinct()`，而 `distinct()` 是被禁的）。
+- 允许使用**无 lambda 的基础操作**：`add()`、`contains()`、`isEmpty()`、`size`、下标 `get()`。
 - 不许用解构、不许 lambda。
 - 注意 `uniqueInOrder` 的复杂度：用 `MutableList.contains()` 判重是可以接受的（本题不要求性能），但请**在注释里说明**为什么它在数据量大时会变慢。
 
