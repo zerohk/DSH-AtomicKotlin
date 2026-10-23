@@ -751,6 +751,9 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `intersectionOf(setOf(1,2,3), setOf(2,3,4))` → `{2, 3}`
 - `unionOf(setOf(1,2,3), setOf(2,3,4))` → `{1, 2, 3, 4}`
 - `differenceOf(setOf(1,2,3), setOf(2,3,4))` → `{1}`
+- ⚠️ **集合运算的结果必须与元素的迭代顺序无关**（下面两条专门抓"用标志位判断、但标志忘了每轮重置"这类错误）：
+  - `differenceOf(setOf(3, 2, 1), setOf(2, 3, 4))` → `{1}`
+  - `differenceOf(setOf(2, 1), setOf(2))` → `{1}`（匹配项排在前面时，后面的元素不能被连带丢掉）
 - `symmetricDifferenceOf(setOf(1,2,3), setOf(2,3,4))` → `{1, 4}`
 
 ---
