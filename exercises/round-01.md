@@ -844,6 +844,9 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `"level".isPalindrome()` → `true`；`"Level".isPalindrome()` → `true`（忽略大小写）
 - `"A man a plan a canal Panama".isPalindrome()` → `true`
 - `"hello".isPalindrome()` → `false`
+- ⚠️ `"abca".isPalindrome()` → `false` —— **首尾都是 `a` 但中间不对称**。这一条专抓"只比较首尾两个字符"的实现：
+  `"level"`（l…l 恰好是回文）、`"hello"`（h≠o 恰好不是回文）、`"A man a plan a canal Panama"`（a…a 恰好是回文）
+  这三条**全抓不出**该缺陷 —— 它们"首尾是否相同"的答案恰好与"是否回文"一致。
 - `"Hello".shout()` → `"HELLO!"`；`"".shout()` → `"!"`；`"Hi!".shout()` → `"HI!"`（已有 `!` 不重复加）
 - `"john ronald reuel tolkien".initials()` → `"J.R.R.T."`；`"  a   b ".initials()` → `"A.B."`；`"".initials()` → `""`
 - `"  a   b  c ".wordCount()` → `3`；`"".wordCount()` → `0`
