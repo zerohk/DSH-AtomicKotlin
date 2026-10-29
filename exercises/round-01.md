@@ -878,7 +878,8 @@ E:\Kotlin\DSH-AtomicKotlin\
 **(b)** 在 `package round01` 的 `Ex25IntExt.kt` 中 **import 这些扩展函数** 并实现：
 
 - `fun demoImportedExtensions(): String` —— 对整数 `4` 依次调用**全部 6 个**扩展，返回**恰好**下面这一行（字段顺序、空格、`=` 都不许变）：
-  `"4 even=true odd=false prime=false fact=24 digitsSum=4 digitsCount=1"`
+  `"4 even=true odd=false prime=false factorial=24 digitsSum=4 digitsCount=1"`
+  （字段名用 `factorial` 而非 `fact` —— 上一版写的是 `fact`，那是我随手的缩写，`factorial` 更清楚，已统一改为此。）
 - `fun sumOfAllPrimesUpTo(limit: Int): Long` —— 在循环里调用 `isPrimeX()` 累加
 
 **约束**：
@@ -898,7 +899,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `sumOfAllPrimesUpTo(10)` → `17L`（2+3+5+7）
 - `sumOfAllPrimesUpTo(1)` → `0L`；`sumOfAllPrimesUpTo(0)` → `0L`（没有素数时返回 0，**不抛异常**）
 - `0.digitsSum()` → `0`
-- `demoImportedExtensions()` → **必须恰好等于** `"4 even=true odd=false prime=false fact=24 digitsSum=4 digitsCount=1"`
+- `demoImportedExtensions()` → **必须恰好等于** `"4 even=true odd=false prime=false factorial=24 digitsSum=4 digitsCount=1"`
 
 ---
 
