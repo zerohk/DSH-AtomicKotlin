@@ -889,6 +889,9 @@ E:\Kotlin\DSH-AtomicKotlin\
 **验收标准**：
 - `4.isEven()` → `true`；`7.isOdd()` → `true`
 - `97.isPrimeX()` → `true`；`1.isPrimeX()` → `false`
+- ⚠️ **素数的边界必须全覆盖**：`2.isPrimeX()` → `true`；`4.isPrimeX()` → `false`；`100.isPrimeX()` → `false`；
+  **`0.isPrimeX()` → `false`**；**`(-7).isPrimeX()` → `false`**
+  （只写 `if (this == 1) return false` 是不够的：`0` 和负数会让试除循环 `2..this-1` 变成空区间，从而**误返回 `true`**。素数定义要求大于 1。）
 - `5.factorialX()` → `120L`；`(-1).factorialX()` 抛异常
 - `1234.digitsSum()` → `10`；`(-1234).digitsSum()` → `10`
 - `0.digitsCount()` → `1`；`1234.digitsCount()` → `4`
