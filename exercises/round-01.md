@@ -930,6 +930,13 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `listOf(1, 2, 3, 4).median()` → `2.5`；`listOf(3, 1, 2).median()` → `2.0`
 - `listOf(1, 2, 1).countOccurrences(1)` → `2`
 - `listOf(3, 1, 2).sortedByHand()` → `[1, 2, 3]`，且**原列表仍为 `[3, 1, 2]`**
+- ⚠️ **降序输入是排序的最强检验**（`[3,1,2]` 只含一次逆序，很多写坏的排序都能碰巧通过）：
+  - `listOf(5, 4, 3).sortedByHand()` → `[3, 4, 5]`
+  - `listOf(9, 8, 7, 6).sortedByHand()` → `[6, 7, 8, 9]`
+  - `listOf(4, 2, 4, 2).sortedByHand()` → `[2, 2, 4, 4]`（有重复元素）
+  - `listOf(4, 1, 3, 2).median()` → `2.5`（这一条同时检验 `sortedByHand` 的正确性）
+  说明：只写"选最小值然后赋给 `numList[i]`"很容易漏掉**被挤出去的那个元素**，
+  在连续下降的输入上会出现元素丢失并被别的值重复填充（如 `[5,4,3]` 变成 `[3,5,5]`）。
 - `listOf(1, 2, 3).isSortedAscending()` → `true`；`listOf(1, 3, 2)` → `false`
 - ⚠️ 空列表的约定（这几个都必须显式测）：
   - `listOf<Int>().rangeOfValues()` 抛 `IllegalArgumentException`
