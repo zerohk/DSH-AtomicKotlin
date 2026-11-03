@@ -1020,6 +1020,8 @@ class Product(val name: String, val priceInCents: Long)
 **验收标准**：
 - `"-v".isValidFlag()` → `true`；`"--verbose".isValidFlag()` → `true`
 - `"-".isValidFlag()`、`"".isValidFlag()`、`"abc".isValidFlag()`、`"-a1".isValidFlag()`、`"---".isValidFlag()` → 全部 `false`
+- ⚠️ `"--".isValidFlag()` → `false` —— 去掉前导 `-` 后**什么都不剩**，属于空 flag。
+  （这一条专门抓"只检查了 `this[1]` 是不是 `-`、却没检查剩下的部分是否非空"的实现：`"---"` 会因为第 3 个字符是 `-` 而被挡下，`"--"` 却会漏过去。）
 - `listOf("-a", "1", "-b", "2").flagNames()` → `{-a, -b}`
 - `listOf("-a", "1", "-b", "2").valueOfFlag("-a")` → `"1"`
 - `listOf("-a", "1").valueOfFlag("-z")` 抛异常；`listOf("-a").valueOfFlag("-a")` 抛异常（后面没值）
@@ -1028,6 +1030,8 @@ class Product(val name: String, val priceInCents: Long)
 - `listOf("input.txt", "-o", "out.txt", "extra").positionalArgs()` → `["input.txt", "extra"]`
   （`input.txt` 前面没有元素；`out.txt` 紧跟在 flag `-o` 之后所以是值；`extra` 前一个是 `out.txt`，不是 flag，所以它算位置参数）
 - `listOf("-a", "1", "-b", "2").toFlagMap()` → 内容等价于 `{-a=1, -b=2}`
+  ⚠️ 注意 `-a` 的值是紧邻它的 `"1"`，**不是** `"2"` —— 取值必须**在下一个 flag 处停下**，
+  写成"把后面所有非 flag 元素都赋给当前 flag"会让后一个 flag 的值把前一个覆盖掉。
 - `listOf("-a").toFlagMap()` 抛 `IllegalArgumentException`
 - `hasFlag`：`listOf("-a", "1").hasFlag("-a")` → `true`；`hasFlag("-z")` → `false`；`listOf<String>().hasFlag("-a")` → `false`
 - 空列表的约定：`listOf<String>().flagNames()` → `{}`；`.positionalArgs()` → `[]`；`.toFlagMap()` → `{}`（三者都不抛异常）
