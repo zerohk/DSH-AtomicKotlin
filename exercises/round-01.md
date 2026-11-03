@@ -44,6 +44,24 @@
 - **标准库的基础函数**：`String` 的 `length`/`get`/`substring`/`lowercase`/`uppercase`/`split`/`trim`，集合的 `size`/`add`/`removeAt`/`contains`/`toList` 等**无 lambda 参数**的基础函数允许使用。
   但凡是题目明确要求"手工实现"的地方（如排序、求最值、求和），**必须自己写循环**，不许调用现成的聚合函数。
 
+### 1.5 术语约定（读题前先看，以下 28 题 + 4 个项目通用）
+
+下面这些词在本文里有**固定含义**，请按这里的定义理解，不要按日常语感：
+
+| 词 | 本文中的确切含义 |
+|---|---|
+| **必须恰好是 / 全等** | 逐字符比较：空格、标点、大小写、全角半角都要一致。"看起来像"不算通过 |
+| **形如 / 例如** | 只举例说明"长什么样"，**不作为判据**。真正的判据一律写在**验收标准**里 |
+| **返回 / 输出** | 函数返回 `String` 时，"输出一行""产生一行"都指**把这一行拼进返回值**，**不是** `println`。多行用 `"\n"` 连接、末尾不带换行 |
+| **计算属性** | 只有 getter、**没有背后存储**的属性（`val x get() = ...`）。每次读都重新算 |
+| **背后存储（backing property）** | 真正存数据的那个 `private var xxxValue`。访问器里**只能改它**；写属性本身会无限递归（`StackOverflowError`） |
+| **委托（本轮的用法）** | 一个 setter 先把值**换算**成另一个单位的量，再**赋给另一个属性**，从而复用它已有的校验。**不是** Kotlin 的 `by` 委托（那是 Section V 的内容） |
+| **快照副本** | 新建一个集合、把元素逐个复制进去，与内部集合**不共享**。外部怎么改都不影响内部 |
+| **字典序** | 按字符编码从左到右逐个比较，就是 `String` 的 `<` 运算符。注意**大写字母排在小写之前**（`'Z' < 'a'`），且 `"10" < "9"` |
+| **退化输入** | 空串、空列表、单元素、`0`、负数、重复元素、首尾空格、连续空格 —— 这些**不是异常情况**，必须明确写出行为 |
+| **不变式** | 操作失败（抛异常或返回 `false`）后，对象状态必须与操作前**完全一致** |
+| **不许 / 严禁** | 违反即视为该题未完成，即使程序能跑出正确结果 |
+
 ---
 
 ## 二、文件与包结构约定
@@ -87,7 +105,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 
 - `celsiusToFahrenheit(c: Double): Double`
 - `fahrenheitToCelsius(f: Double): Double`
-- `describe(c: Double): String` —— 返回形如 `"25.0°C = 77.0°F"` 的一行文本
+- `describe(c: Double): String` —— **必须恰好是** `"25.0°C = 77.0°F"` 这种形状：两个温度各保留 **1 位小数**，`°C`、` = `（等号两侧各一个空格）、`°F` 三处**逐字固定**，只在数值位置替换
 
 **约束**：
 - `describe` 必须是**单表达式函数**（`= ` 形式），且用字符串模板拼装，不许用字符串相加。
@@ -485,7 +503,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `val area: Double` —— 计算属性（**不允许有 backing field**，用 `get() = ...`）
 - `val perimeter: Double` —— 同上
 - `val isSquare: Boolean` —— 同上
-- `fun describe(): String` —— 形如 `"3.0x4.0 area=12.0 perimeter=14.0 square=false"`
+- `fun describe(): String` —— **必须恰好是** `"3.0x4.0 area=12.0 perimeter=14.0 square=false"` 这种形状：宽高用**小写 `x`** 连接、字段之间**一个空格**、`area=` / `perimeter=` / `square=` 三处**逐字固定**（`square` 的值只能是 `true` 或 `false`）
 
 **约束**：
 - `width` / `height` 用 `val` 且**不可为负**：构造时若 `< 0` 或不是有限数，抛 `IllegalArgumentException`（在 `init` 块里做）。
@@ -528,7 +546,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `var fahrenheit: Double` —— 自定义 `get()` 和 `set()`
   - `get()` 由摄氏换算得到
   - `set(value)` 换算回摄氏，并经 `celsius` 的 setter 走一遍校验（**即：不要重复写校验逻辑**）
-- `fun describe(): String` —— 形如 `"25.0°C / 77.0°F"`
+- `fun describe(): String` —— **必须恰好是** `"25.0°C / 77.0°F"` 这种形状：`°` 是 `U+00B0` **加上**字母 `C`/`F`（两个字符，不是合体字 `℃`），` / ` 两侧各一个空格
 
 > 🆘 **如果 `init` 块、自定义 `get`/`set`、"委托"这三样里任何一个不会写**，先去做 [Part C 加练（4 道小题）](part-c-drills.md)：D1 只练 `init` 校验，D2 只练自定义 setter，D3 是**和本题结构完全一样**的重量换算题（做完这题，本题骨架就会写了），D4 练 `field` 关键字。
 >
@@ -566,7 +584,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 - `fun deposit(cents: Long)` —— 金额必须 `> 0`，否则抛 `IllegalArgumentException`
 - `fun withdraw(cents: Long)` —— 金额必须 `> 0`；余额不足时抛 `IllegalStateException("余额不足")`
 - `fun transferTo(other: BankAccount, cents: Long)` —— 从本账户转到另一个账户；**任一步失败时两边余额都必须保持原样**（想清楚校验该放在动手之前还是之后）
-- `fun statement(): String` —— 形如 `"Ada: 10000 分"`
+- `fun statement(): String` —— **必须恰好是** `"Ada: 10000 分"` 这种形状：`<持有人>: <余额> 分`（冒号后**一个空格**，`分` 前**一个空格**）
 
 **约束**：
 - `balanceInCents` 必须是 `private`，外部**无法**直接读写。
@@ -805,7 +823,7 @@ E:\Kotlin\DSH-AtomicKotlin\
 **约束**：
 - 不许用 `joinToString`、不许用 `kotlin.math`、不许 lambda、不许 `when`、不许解构。
 - 注意 `vararg` 参数在函数体内是**数组**：请分别用"下标 `while` 循环"和"`for (x in nums)`"各写一次，比较两种写法的手感（在注释里写结论）。
-- `maxAll` 不允许用 `nums.max()` 之类的聚合函数，手工比较。
+- `maxAll` 不许调用任何现成的最值函数（`max()`、`maxOrNull()`、`min()`、`minOrNull()`、`reduce()`、`fold()`），必须自己逐个比较。
 
 **验收标准**：
 - `sumAll(1, 2, 3)` → `6L`；`sumAll()` → `0L`
@@ -971,7 +989,7 @@ class Product(val name: String, val priceInCents: Long)
   （**手工格式化**，不许 `String.format`；注意补零）
 - `fun Product.withDiscount(percent: Int): Product` —— 返回**新的** `Product`，价格按百分比下调并**向下取整**到分；`percent` 不在 `0..100` 时抛 `IllegalArgumentException`
 - `fun Product.isAffordable(budgetInCents: Long): Boolean`
-- `fun Product.describe(): String` —— 形如 `"Widget: 19.99 元"`
+- `fun Product.describe(): String` —— **必须恰好是** `"Widget: 19.99 元"` 这种形状：`<名字>: <价格> 元`（冒号后一个空格，`元` 前一个空格）
 - `fun List<Product>.totalPriceInCents(): Long`
 - `fun List<Product>.mostExpensive(): Product` —— 空列表抛 `IllegalArgumentException`；并列时返回**名字字典序最小**的
 
@@ -1004,7 +1022,9 @@ class Product(val name: String, val priceInCents: Long)
 
 **任务**：为 `String` 和 `List<String>` 写扩展函数，模拟命令行参数解析：
 
-- `fun String.isValidFlag(): Boolean` —— 合法形如 `-x`（短）或 `--xyz`（长）；即：以 `-` 开头、去掉前导 `-` 后剩余部分非空、且**全部是字母**。`"-"`、`""`、`"abc"`、`"-a1"`、`"---"` 都非法
+- `fun String.isValidFlag(): Boolean` —— 只有两种合法形态：短 flag `-x`、长 flag `--xyz`。
+  判定顺序：① 以 `-` 开头；② 去掉前导 `-` 后剩余部分**非空**；③ 剩余部分**全部是字母**（`a..z` 或 `A..Z`）。
+  `"-"`、`""`、`"abc"`、`"-a1"`、`"--"`、`"---"`、`"-a-"`、`"-1"` 全部非法。
 - `fun List<String>.flagNames(): Set<String>` —— 提取所有合法 flag 名（**保持原样、去重**）
 - `fun List<String>.valueOfFlag(flag: String): String` —— 返回紧随该 flag 之后的那个元素；flag 不存在、或后面没有元素、或该 flag 非法时抛 `IllegalArgumentException`
 - `fun List<String>.hasFlag(flag: String): Boolean`
@@ -1070,7 +1090,8 @@ class Product(val name: String, val priceInCents: Long)
 **功能需求**：
 
 1. `class Book(val isbn: String, val title: String, val author: String, var available: Boolean)`
-   - `val summary: String` 计算属性，形如 `"[978-7-111] Kotlin 实战 / 张三 / 可借"`
+   - `val summary: String` —— 计算属性（只有 getter，没有背后存储），**必须恰好是** `"[978-7-111] Kotlin 实战 / 张三 / 可借"` 这种形状：
+     `[<isbn>] <title> / <author> / <状态>`；`available` 为 `true` 时状态是 `可借`，为 `false` 时是 `已借出`；`/` **两侧各一个空格**
    - 构造时校验：isbn、title、author 均非空且无首尾空格，否则抛 `IllegalArgumentException`
 2. `class Library`：
    - `private val booksByIsbn: MutableMap<String, Book>`
@@ -1134,7 +1155,9 @@ class Product(val name: String, val priceInCents: Long)
    - `fun addScore(student: Student, score: Int)` —— score 必须在 `0..maxScore` 内，否则抛 `IllegalArgumentException`；同一学生可加多次（记全部成绩）
    - `val count: Int`、`val average: Double`、`val highest: Int`、`val lowest: Int` —— **全部为计算属性**（`get() = ...`），空数据时 `average` 等抛 `IllegalStateException`
    - `fun scoresOf(student: Student): List<Int>`
-   - `fun passRate(): Double` —— 及格线为 `maxScore * 0.6`（**取整规则自己定义并写进注释**）
+   - `fun passRate(): Double` —— 及格率 = 及格成绩数 ÷ 总成绩数。
+     **及格判定写死**：某次成绩 `>= maxScore * 0.6` 即为及格（直接比较浮点数，**不做任何取整**）。
+     例：`maxScore = 100` 时 60 分及格；`maxScore = 50` 时 30 分及格。全部及格 → `1.0`，全部不及格 → `0.0`；空数据抛 `IllegalStateException`（与 `average` 一致）
    - `fun distribution(buckets: Int): Map<String, Int>` —— 把 `0..maxScore` 切成 `buckets` 段并计数。
      **切分规则（照此实现，避免歧义）**：段宽 `width = maxScore / buckets`（整数除法）；第 `i` 段（`i` 从 0 起）覆盖 `[i*width, i*width + width - 1]`，**最后一段的上界取 `maxScore`**；key 形如 `"起-止"`。
      例：`maxScore = 100, buckets = 5` 时 key 依次为 `"0-19"`、`"20-39"`、`"40-59"`、`"60-79"`、`"80-100"`。
@@ -1147,7 +1170,9 @@ class Product(val name: String, val priceInCents: Long)
    - `fun List<Int>.median2(): Double` —— 直接复用你第 26 题手工排序的思路（**注意：这里函数名不能和第 26 题重名冲突，所以叫 `median2`**）
    - `fun ScoreSheet.topN(n: Int): List<Student>` —— 前 n 名；`n` 非法时抛 `IllegalArgumentException`
    - `fun ScoreSheet.studentsById(): Set<String>`
-4. `fun summarize(vararg scores: Int): String` —— 用 vararg 直接给一组成绩，返回 `"n=5 min=10 max=90 avg=48.0"` 之类的一行摘要（平均分保留 1 位小数，手工格式化）
+4. `fun summarize(vararg scores: Int): String` —— 用 vararg 直接给一组成绩，返回**恰好一行**，格式**逐字固定**为：
+   `"n=<个数> min=<最小> max=<最大> avg=<平均>"`，字段之间**一个空格**，`avg` **保留 1 位小数**（手工格式化，不许 `String.format`）。
+   例：`summarize(10, 20, 90)` → `"n=3 min=10 max=90 avg=40.0"`。空参抛 `IllegalArgumentException`。
 
 **验收标准**：
 - 加 3 个学生、各 2 次成绩，`count` → `6`
@@ -1179,7 +1204,7 @@ class Product(val name: String, val priceInCents: Long)
    - `val balanceCents: Long` 只读；**不允许外部写入**
    - `fun deposit(cents: Long)`、`fun withdraw(cents: Long)`（余额不足抛 `IllegalStateException`）
    - `private val history: MutableList<String>` + `fun historySnapshot(): List<String>`（返回**副本**）
-   - `fun statement(): String` —— 形如 `"1001 Ada: 7000 分"`，即 `"<账号> <持有人>: <余额> 分"`
+   - `fun statement(): String` —— **必须恰好是** `"1001 Ada: 7000 分"` 这种形状：`<账号> <持有人>: <余额> 分`（账号与持有人之间**一个空格**，冒号后**一个空格**，`分` 前**一个空格**）
 2. `class Bank`：
    - `private val accounts: MutableMap<String, Account>`
    - `private val closedNumbers: MutableSet<String>` —— 已销户的账号（**销户后不允许重新开户**）
@@ -1231,7 +1256,8 @@ class Product(val name: String, val priceInCents: Long)
    - `fun place(row: Int, col: Int, mark: Char): Boolean` —— mark 只能是 `'X'`/`'O'`；该格已被占用时返回 `false` 且状态不变
    - `fun isFull(): Boolean`
    - `fun winner(): Char` —— 返回 `'X'` / `'O'` / `'.'`（无胜者时返回 `'.'`，**不用可空类型**）
-   - `fun render(): String` —— 3 行 3 列，用 `|` 分隔，形如 `"X|O|.\n.|X|.\n.|.|X"`
+   - `fun render(): String` —— **必须恰好是** 3 行、每行 5 个字符、行与行之间用 `\n` 连接，格子之间用 `|` 分隔。
+     例：`"X|O|.\n.|X|.\n.|.|X"`（空位是半角句点 `.`，末尾**不带**换行）
    - `fun availableMoves(): List<Int>` —— 返回空格的下标列表
 2. `class Game`：
    - `private var current: Char = 'X'`
@@ -1246,7 +1272,7 @@ class Product(val name: String, val priceInCents: Long)
    - `fun List<Char>.hasTriple(mark: Char): Boolean` —— 判断 9 个格子里是否存在三连（行 / 列 / 对角线）
    - `fun Board.marksCount(mark: Char): Int`
    - `fun Board.lineIndices(): List<List<Int>>` —— 返回全部 8 条获胜线的下标组合（**注意：这里不能自定义泛型，但 `List<List<Int>>` 是使用已有泛型类型，允许**）
-4. `fun runGame(moves: List<String>): String` —— 每条命令形如 `"1 2"`（行 列）。**返回值契约**：
+4. `fun runGame(moves: List<String>): String` —— 每条命令是**两个用单个空格分隔的整数**（行 列），例如 `"1 2"`。**返回值契约**：
    - 把每一步的输出用 `"\n"` 连接，末尾不带换行
    - 每步**成功落子**后：先输出 `board().render()` 的内容，再输出一行 `result()`
    - 非法输入（格式不对 / 越界 / 已占用）：输出**恰好一行**以 `"错误: "` 开头的内容，然后继续下一步
