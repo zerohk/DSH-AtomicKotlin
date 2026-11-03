@@ -1097,8 +1097,12 @@ class Product(val name: String, val priceInCents: Long)
    - `private val booksByIsbn: MutableMap<String, Book>`
    - `private val borrowedBy: MutableMap<String, String>` —— isbn → 借阅人
    - `fun add(book: Book): Boolean` —— isbn 重复时返回 `false` 且不改动任何状态
-   - `fun borrow(isbn: String, borrower: String): Boolean` —— 不存在或已借出时返回 `false` 且**状态不变**
-   - `fun giveBack(isbn: String): Boolean`
+   - `fun borrow(isbn: String, borrower: String): Boolean` —— **三种失败都返回 `false` 且状态不变**：
+     ① isbn 不存在；② 该书已借出；③ 借阅人为空串或全是空格（`""`、`" "` 都算无效）。
+     成功时记录借阅人并把 `available` 置为 `false`
+   - `fun giveBack(isbn: String): Boolean` —— **与 `borrow` 风格一致，失败返回 `false`、不抛异常**：
+     ① isbn 不存在 → `false`；② 该书当前并未借出 → `false`（不能把未借出的书"还"一次）。
+     成功时删除借阅记录、把 `available` 置回 `true`、返回 `true`
    - `fun findByAuthor(author: String): List<Book>` —— 手工循环，大小写不敏感
    - `fun availableBooks(): List<Book>`
    - `fun borrowedBooks(): List<Book>`
